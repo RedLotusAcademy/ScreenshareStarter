@@ -13,6 +13,7 @@ function Invoke-RemoteScript {
         catch { Write-Host "ERROR - $Name : $_" -ForegroundColor Red }
     }
 }
+
 Invoke-RemoteScript "Services.ps1"          "https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1"
 Invoke-RemoteScript "DoomsDayDetector.ps1"  "https://raw.githubusercontent.com/zedoonvm1/powershell-scripts/refs/heads/main/DoomsDayDetector.ps1"
 Invoke-RemoteScript "HabibiModAnalyzer.ps1" "https://raw.githubusercontent.com/HadronCollision/PowershellScripts/refs/heads/main/HabibiModAnalyzer.ps1"
@@ -27,7 +28,8 @@ $CollectorExe     = Join-Path $CollectorDir "Collector.exe"
 if (Prompt-YN "Run Collector.exe ? [Y/N]") {
     try {
         Write-Host "Downloading..." -ForegroundColor DarkGray
-        Invoke-WebRequest -Uri $CollectorZipUrl -OutFile $CollectorZipPath -UseBasicParsing
+        (New-Object System.Net.WebClient).DownloadFile($CollectorZipUrl, $CollectorZipPath)
+        Write-Host "Download complete. Extracting..." -ForegroundColor DarkGray
         Expand-Archive -Path $CollectorZipPath -DestinationPath $env:TEMP -Force
         if (Test-Path $CollectorExe) {
             Start-Process -FilePath $CollectorExe -Verb RunAs -Wait
@@ -38,6 +40,7 @@ if (Prompt-YN "Run Collector.exe ? [Y/N]") {
         Write-Host "ERROR - Collector: $_" -ForegroundColor Red
     }
 }
+
 if (Prompt-YN "Cleanup files? (Collector.zip, collector\, C:\Screenshare\) [Y/N]") {
     foreach ($path in @($CollectorZipPath, $CollectorDir, "C:\Screenshare")) {
         if (Test-Path $path) {
